@@ -89,9 +89,6 @@ export function AuthForm() {
               {isPending ? "Entrando..." : "Entrar"}
             </Button>
           </form>
-          <p className="mt-4 text-center text-xs leading-5 text-app-text-muted">
-            Si necesitas otra cuenta, se habilita manualmente desde configuración del servidor.
-          </p>
         </CardContent>
       </Card>
     </motion.div>
