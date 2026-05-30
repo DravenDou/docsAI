@@ -236,7 +236,7 @@ export function ChatPanel({
             </div>
           </form>
           <p className="text-center text-[11px] leading-4 text-slate-400 dark:text-slate-500">
-            Bussi RAG puede equivocarse; verifica las citas de documento, página y chunk.
+            DOCSAI puede equivocarse; verifica las citas de documento, página y chunk.
           </p>
         </div>
       </div>

@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Bussi RAG",
+  title: "DOCSAI",
   description: "Asistente RAG open source para documentos empresariales.",
 };
 

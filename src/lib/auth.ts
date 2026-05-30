@@ -10,7 +10,7 @@ import { getServerEnv } from "@/src/lib/env";
 const env = getServerEnv();
 
 export const auth = betterAuth({
-  appName: "Bussi RAG",
+  appName: "DOCSAI",
   baseURL: env.BETTER_AUTH_URL,
   secret: env.BETTER_AUTH_SECRET,
   database: drizzleAdapter(db, {

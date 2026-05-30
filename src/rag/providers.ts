@@ -64,7 +64,7 @@ function getProvider(provider: AiProviderName) {
       baseURL: "https://openrouter.ai/api/v1",
       headers: {
         "HTTP-Referer": getServerEnv().BETTER_AUTH_URL,
-        "X-Title": "Bussi RAG Portfolio",
+        "X-Title": "DOCSAI",
       },
     });
   }

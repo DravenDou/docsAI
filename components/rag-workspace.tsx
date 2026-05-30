@@ -124,7 +124,7 @@ export function RagWorkspace({ userEmail }: { userEmail: string }) {
             <MessageSquareText className="h-4 w-4" aria-hidden="true" />
           </div>
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium">Bussi RAG</p>
+            <p className="truncate text-sm font-medium">DOCSAI</p>
             <p className="text-xs text-slate-500 dark:text-slate-400">Docs empresariales</p>
           </div>
           <Button
@@ -198,7 +198,7 @@ export function RagWorkspace({ userEmail }: { userEmail: string }) {
               )}
             </Button>
             <div className="min-w-0">
-              <p className="text-sm font-semibold">Bussi RAG</p>
+              <p className="text-sm font-semibold">DOCSAI</p>
               <p className="truncate text-xs text-slate-500 dark:text-slate-400">{userEmail}</p>
             </div>
           </div>

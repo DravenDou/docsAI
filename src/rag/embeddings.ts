@@ -63,7 +63,7 @@ async function embedWithOpenRouter(
       Authorization: `Bearer ${requireProviderKey("openrouter")}`,
       "Content-Type": "application/json",
       "HTTP-Referer": env.BETTER_AUTH_URL,
-      "X-Title": "Bussi RAG Portfolio",
+      "X-Title": "DOCSAI",
     },
     body: JSON.stringify({
       model: config.model,
