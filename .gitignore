@@ -1,0 +1,39 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# next
+.next/
+out/
+
+# env
+.env
+.env.*
+!.env.example
+
+# local data / uploads
+.data/
+/uploads/
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# tests/build artifacts
+coverage/
+playwright-report/
+test-results/
+security_best_practices_report.md
+
+# OS/editor
+.DS_Store
+.vscode/
+.idea/
+
+# local agent tooling
+.agents/
+skills-lock.json
+
+# TypeScript
+*.tsbuildinfo
