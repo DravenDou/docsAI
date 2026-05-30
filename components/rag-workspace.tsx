@@ -66,7 +66,7 @@ export function RagWorkspace({ userEmail }: { userEmail: string }) {
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
-      const stored = window.localStorage.getItem("bussi-docs-panel-open");
+      const stored = window.localStorage.getItem("docsai-docs-panel-open") ?? window.localStorage.getItem("bussi-docs-panel-open");
       if (stored !== null) {
         setIsSidebarOpen(stored === "true");
       } else if (window.matchMedia("(max-width: 767px)").matches) {
@@ -80,7 +80,7 @@ export function RagWorkspace({ userEmail }: { userEmail: string }) {
 
   useEffect(() => {
     if (!isSidebarPreferenceLoaded) return;
-    window.localStorage.setItem("bussi-docs-panel-open", String(isSidebarOpen));
+    window.localStorage.setItem("docsai-docs-panel-open", String(isSidebarOpen));
   }, [isSidebarOpen, isSidebarPreferenceLoaded]);
 
   const readyDocuments = useMemo(() => documents.filter((document) => document.status === "ready"), [documents]);
@@ -101,65 +101,66 @@ export function RagWorkspace({ userEmail }: { userEmail: string }) {
   }
 
   return (
-    <main className="flex h-screen min-h-screen overflow-hidden bg-white text-slate-950 transition-colors duration-300 dark:bg-[#212121] dark:text-slate-50">
+    <main className="flex max-h-[100dvh] min-h-[100dvh] overflow-hidden bg-app-background text-foreground transition-colors duration-300">
       {isSidebarOpen ? (
         <button
           type="button"
-          className="fixed inset-0 z-30 bg-slate-950/20 backdrop-blur-[1px] md:hidden dark:bg-black/50"
+          className="fixed inset-0 z-30 bg-black/20 backdrop-blur-[1px] md:hidden dark:bg-black/55"
           aria-label="Cerrar panel de documentos"
           onClick={() => setIsSidebarOpen(false)}
         />
       ) : null}
+
       <aside
         id="documents-panel"
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex h-full w-80 shrink-0 flex-col overflow-hidden border-r border-[#e5e5e5] bg-[#f9f9f9] text-slate-900 shadow-2xl shadow-slate-950/10 transition-[transform,width,opacity,background-color,border-color] duration-200 ease-out md:static md:z-auto md:shadow-none dark:border-[#2f2f2f] dark:bg-[#171717] dark:text-slate-100",
+          "fixed inset-y-0 left-0 z-40 flex h-[100dvh] w-[21rem] max-w-[calc(100vw-1rem)] shrink-0 flex-col overflow-hidden border-r border-app-border bg-app-sidebar text-foreground shadow-2xl shadow-black/10 transition-[transform,width,opacity,border-color,background-color] duration-300 ease-out md:static md:z-auto md:max-w-none md:shadow-none",
           isSidebarOpen
             ? "translate-x-0 opacity-100"
-            : "-translate-x-full opacity-0 md:w-0 md:translate-x-0 md:border-r-0",
+            : "-translate-x-full opacity-0 md:w-0 md:translate-x-0 md:border-r-0 md:opacity-100",
         )}
       >
-        <div className="flex h-14 items-center gap-3 border-b border-[#e5e5e5] px-3 dark:border-[#2f2f2f]">
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-[#e5e5e5] bg-white text-slate-950 shadow-sm dark:border-[#2f2f2f] dark:bg-[#212121] dark:text-slate-50">
-            <MessageSquareText className="h-4 w-4" aria-hidden="true" />
+        <div className="flex h-14 shrink-0 items-center gap-3 border-b border-app-border px-3">
+          <div className="flex size-8 items-center justify-center rounded-[var(--radius-row)] border border-app-border bg-app-surface-raised text-foreground shadow-sm">
+            <MessageSquareText className="size-4" aria-hidden="true" />
           </div>
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium">DOCSAI</p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Docs empresariales</p>
+            <p className="truncate text-sm font-semibold tracking-tight">DOCSAI</p>
+            <p className="text-xs text-app-text-muted">Docs empresariales</p>
           </div>
           <Button
             type="button"
             variant="ghost"
             size="icon"
-            className="ml-auto h-8 w-8"
+            className="ml-auto size-9 rounded-full hover:bg-app-hover"
             aria-controls="documents-panel"
             aria-expanded={isSidebarOpen}
             aria-label="Cerrar panel de documentos"
             onClick={() => setIsSidebarOpen(false)}
           >
-            <PanelLeftClose className="h-4 w-4" aria-hidden="true" />
+            <PanelLeftClose className="size-4" aria-hidden="true" />
           </Button>
         </div>
 
-        <div className="flex-1 space-y-3 overflow-y-auto p-2">
-          <div className="rounded-2xl border border-[#e5e5e5] bg-white p-2 transition-colors dark:border-[#2f2f2f] dark:bg-[#212121]">
-            <div className="mb-2 flex items-center gap-2 px-2 pt-1 text-sm font-medium">
-              <FileText className="h-4 w-4" aria-hidden="true" />
-              Documentos
-            </div>
-            <DocumentUploader onUploaded={refreshDocuments} />
+        <div className="docsai-scrollbar min-h-0 flex-1 overflow-y-auto p-3">
+          <div className="mb-3 flex items-center gap-2 px-1 text-xs font-medium uppercase tracking-[0.18em] text-app-text-muted">
+            <FileText className="size-3.5" aria-hidden="true" />
+            Documentos
           </div>
-          <DocumentList
-            documents={documents}
-            isLoading={isLoading}
-            selectedIds={selectedIds}
-            onSelectionChange={setSelectedIds}
-            onDeleted={refreshDocuments}
-          />
+          <div className="space-y-3">
+            <DocumentUploader onUploaded={refreshDocuments} />
+            <DocumentList
+              documents={documents}
+              isLoading={isLoading}
+              selectedIds={selectedIds}
+              onSelectionChange={setSelectedIds}
+              onDeleted={refreshDocuments}
+            />
+          </div>
         </div>
 
-        <div className="border-t border-[#e5e5e5] p-3 dark:border-[#2f2f2f]">
-          <div className="mb-3 truncate rounded-xl bg-white px-3 py-2 text-xs text-slate-500 dark:bg-[#212121] dark:text-slate-400">
+        <div className="shrink-0 border-t border-app-border p-3">
+          <div className="mb-3 truncate rounded-[var(--radius-row)] border border-app-border bg-app-surface-raised px-3 py-2 text-xs text-app-text-muted">
             {userEmail}
           </div>
           <div className="grid grid-cols-[1fr_auto] gap-2">
@@ -167,50 +168,50 @@ export function RagWorkspace({ userEmail }: { userEmail: string }) {
               type="button"
               variant="outline"
               size="sm"
-              className="w-full bg-white dark:border-[#2f2f2f] dark:bg-[#212121]"
+              className="w-full rounded-full border-app-border bg-app-surface-raised hover:bg-app-hover"
               onClick={signOut}
             >
-              <LogOut className="h-4 w-4" aria-hidden="true" />
+              <LogOut className="size-4" aria-hidden="true" />
               Salir
             </Button>
-            <ThemeToggle className="h-9 w-9 dark:border-[#2f2f2f] dark:bg-[#212121]" />
+            <ThemeToggle className="size-9 rounded-full border-app-border bg-app-surface-raised hover:bg-app-hover" />
           </div>
         </div>
       </aside>
 
       <section className="flex min-w-0 flex-1 flex-col">
-        <div className="flex h-14 items-center justify-between border-b border-slate-200 bg-white px-4 transition-colors dark:border-[#2f2f2f] dark:bg-[#212121] md:hidden">
+        <div className="flex h-14 shrink-0 items-center justify-between border-b border-app-border bg-app-background px-3 transition-colors md:hidden">
           <div className="flex min-w-0 items-center gap-3">
             <Button
               type="button"
               variant="ghost"
               size="icon"
-              className="h-9 w-9"
+              className="size-9 rounded-full hover:bg-app-hover"
               aria-controls="documents-panel"
               aria-expanded={isSidebarOpen}
               aria-label={isSidebarOpen ? "Cerrar panel de documentos" : "Abrir panel de documentos"}
               onClick={() => setIsSidebarOpen((open) => !open)}
             >
               {isSidebarOpen ? (
-                <PanelLeftClose className="h-4 w-4" aria-hidden="true" />
+                <PanelLeftClose className="size-4" aria-hidden="true" />
               ) : (
-                <PanelLeftOpen className="h-4 w-4" aria-hidden="true" />
+                <PanelLeftOpen className="size-4" aria-hidden="true" />
               )}
             </Button>
             <div className="min-w-0">
-              <p className="text-sm font-semibold">DOCSAI</p>
-              <p className="truncate text-xs text-slate-500 dark:text-slate-400">{userEmail}</p>
+              <p className="text-sm font-semibold tracking-tight">DOCSAI</p>
+              <p className="truncate text-xs text-app-text-muted">{userEmail}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <ThemeToggle className="h-9 w-9 dark:border-[#2f2f2f] dark:bg-[#212121]" />
-            <Button type="button" variant="outline" size="sm" onClick={signOut}>
+            <ThemeToggle className="size-9 rounded-full border-app-border bg-app-surface-raised hover:bg-app-hover" />
+            <Button type="button" variant="outline" size="sm" className="rounded-full border-app-border" onClick={signOut}>
               Salir
             </Button>
           </div>
         </div>
         {error ? (
-          <Alert variant="destructive" className="m-3">
+          <Alert variant="destructive" className="m-3 rounded-[var(--radius-panel)]">
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         ) : null}

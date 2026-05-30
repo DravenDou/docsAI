@@ -13,7 +13,6 @@ import {
 } from "@/src/components/ai-elements/attachments";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { EMBEDDING_OPTIONS } from "@/src/rag/model-options";
 import { cn } from "@/src/lib/utils";
@@ -104,79 +103,91 @@ export function DocumentUploader({ onUploaded }: { onUploaded: () => Promise<voi
   }
 
   return (
-    <Card className="border-[#e5e5e5] bg-white shadow-none transition-colors dark:border-[#2f2f2f] dark:bg-[#212121]">
-      <CardHeader className="space-y-1.5 p-4">
-        <CardTitle className="flex items-center gap-2 text-base dark:text-slate-50">
-          <UploadCloud className="h-5 w-5" aria-hidden="true" />
-          Subir PDF
-        </CardTitle>
-        <CardDescription className="text-xs">Storage privado local; no S3 externo.</CardDescription>
-      </CardHeader>
-      <CardContent className="p-4 pt-0">
-        <form className="space-y-4" onSubmit={onSubmit}>
-          <fieldset className="space-y-2">
-            <legend className="text-xs font-medium text-slate-700 dark:text-slate-300">Embeddings para este documento</legend>
-            <div className="space-y-2">
-              {EMBEDDING_OPTIONS.map((option) => {
-                const key = optionKey(option);
-                const isSelected = key === embeddingKey;
-                return (
-                  <label
-                    key={key}
-                    className={cn(
-                      "block cursor-pointer rounded-2xl border p-3 text-sm transition",
-                      isSelected
-                        ? "border-slate-900 bg-slate-50 dark:border-slate-200 dark:bg-[#2a2a2a]"
-                        : "border-[#e5e5e5] bg-white hover:bg-[#f9f9f9] dark:border-[#2f2f2f] dark:bg-[#212121] dark:hover:bg-[#2a2a2a]",
-                    )}
-                  >
-                    <input
-                      className="sr-only"
-                      type="radio"
-                      name="embeddingOption"
-                      value={key}
-                      checked={isSelected}
-                      onChange={() => setEmbeddingKey(key)}
-                    />
-                    <span className="flex items-center justify-between gap-3">
-                      <span className="font-medium text-slate-900 dark:text-slate-50">{option.label}</span>
-                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] uppercase tracking-wide text-slate-500 dark:bg-[#333333] dark:text-slate-300">
-                        {option.shortLabel}
-                      </span>
-                    </span>
-                    <span className="mt-1 block text-xs leading-5 text-slate-500 dark:text-slate-400">
-                      {option.description}
-                    </span>
-                  </label>
-                );
-              })}
-            </div>
-          </fieldset>
-          {selectedAttachment ? (
-            <Attachments variant="list">
-              <Attachment data={selectedAttachment} onRemove={clearSelectedFile}>
-                <AttachmentPreview />
-                <AttachmentInfo showMediaType />
-                <AttachmentRemove label="Quitar archivo" />
-              </Attachment>
-            </Attachments>
-          ) : null}
-          <Input ref={inputRef} type="file" accept="application/pdf,.pdf" required onChange={onFileChange} />
-          {message ? (
-            <Alert variant="muted">
-              <AlertDescription>{message}</AlertDescription>
-            </Alert>
-          ) : null}
-          {error ? (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          ) : null}
-          <Button className="w-full" type="submit" disabled={isUploading}>
-            {isUploading ? "Subiendo..." : "Subir y procesar"}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+    <section className="rounded-[var(--radius-panel)] border border-app-border bg-app-surface-raised p-3 shadow-sm">
+      <div className="mb-3 flex items-start gap-3">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-[var(--radius-row)] bg-app-muted-surface">
+          <UploadCloud className="size-4" aria-hidden="true" />
+        </div>
+        <div className="min-w-0">
+          <h2 className="text-sm font-semibold tracking-tight">Subir PDF</h2>
+          <p className="mt-1 text-xs leading-5 text-app-text-muted">Storage local privado, sin S3 externo.</p>
+        </div>
+      </div>
+
+      <form className="space-y-3" onSubmit={onSubmit}>
+        <fieldset className="space-y-2">
+          <legend className="sr-only">Embeddings para este documento</legend>
+          {EMBEDDING_OPTIONS.map((option) => {
+            const key = optionKey(option);
+            const isSelected = key === embeddingKey;
+            return (
+              <label
+                key={key}
+                className={cn(
+                  "block cursor-pointer rounded-[var(--radius-row)] border p-3 text-sm transition",
+                  isSelected
+                    ? "border-foreground bg-app-muted-surface"
+                    : "border-app-border bg-app-surface hover:bg-app-hover",
+                )}
+              >
+                <input
+                  className="sr-only"
+                  type="radio"
+                  name="embeddingOption"
+                  value={key}
+                  checked={isSelected}
+                  onChange={() => setEmbeddingKey(key)}
+                />
+                <span className="flex min-w-0 items-center justify-between gap-3">
+                  <span className="min-w-0 truncate font-medium">{option.label}</span>
+                  <span className="shrink-0 rounded-full bg-app-surface-raised px-2 py-0.5 text-[10px] uppercase tracking-wide text-app-text-muted">
+                    {option.shortLabel}
+                  </span>
+                </span>
+                <span className="mt-1 block text-xs leading-5 text-app-text-muted">{option.description}</span>
+              </label>
+            );
+          })}
+        </fieldset>
+
+        {selectedAttachment ? (
+          <Attachments variant="list">
+            <Attachment
+              data={selectedAttachment}
+              className="rounded-[var(--radius-row)] border-app-border bg-app-surface hover:bg-app-hover"
+              onRemove={clearSelectedFile}
+            >
+              <AttachmentPreview className="rounded-[var(--radius-row)] bg-app-muted-surface" />
+              <AttachmentInfo showMediaType />
+              <AttachmentRemove className="rounded-full hover:bg-app-hover" label="Quitar archivo" />
+            </Attachment>
+          </Attachments>
+        ) : null}
+
+        <Input
+          ref={inputRef}
+          type="file"
+          accept="application/pdf,.pdf"
+          required
+          onChange={onFileChange}
+          className="h-auto min-h-11 rounded-[var(--radius-row)] border-app-border bg-app-surface py-2 dark:bg-app-surface text-xs file:mr-3 file:rounded-full file:border-0 file:bg-app-muted-surface file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-foreground"
+        />
+
+        {message ? (
+          <Alert variant="muted" className="rounded-[var(--radius-row)] border-app-border bg-app-surface dark:bg-app-surface">
+            <AlertDescription>{message}</AlertDescription>
+          </Alert>
+        ) : null}
+        {error ? (
+          <Alert variant="destructive" className="rounded-[var(--radius-row)]">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        ) : null}
+
+        <Button className="h-10 w-full rounded-full" type="submit" disabled={isUploading}>
+          {isUploading ? "Subiendo..." : "Subir y procesar"}
+        </Button>
+      </form>
+    </section>
   );
 }

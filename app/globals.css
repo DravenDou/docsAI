@@ -29,7 +29,22 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
-  --radius: 0.625rem;
+  --radius: 0.75rem;
+  --app-background: #ffffff;
+  --app-sidebar: #f9f9f8;
+  --app-surface: #ffffff;
+  --app-surface-raised: #ffffff;
+  --app-muted-surface: #f4f4f4;
+  --app-hover: #f2f2f2;
+  --app-border: #e5e5e5;
+  --app-border-strong: #d9d9d9;
+  --app-text-muted: #6b7280;
+  --app-user: #f4f4f4;
+  --app-glow: 0 18px 55px rgba(15, 23, 42, 0.1);
+  --radius-chat: 1.75rem;
+  --radius-panel: 1rem;
+  --radius-row: 0.875rem;
+  --radius-pill: 999px;
 }
 
 .dark {
@@ -52,6 +67,17 @@
   --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 14%);
   --ring: oklch(0.556 0 0);
+  --app-background: #212121;
+  --app-sidebar: #171717;
+  --app-surface: #212121;
+  --app-surface-raised: #2f2f2f;
+  --app-muted-surface: #2a2a2a;
+  --app-hover: #303030;
+  --app-border: #343434;
+  --app-border-strong: #444444;
+  --app-text-muted: #b4b4b4;
+  --app-user: #2f2f2f;
+  --app-glow: 0 18px 60px rgba(0, 0, 0, 0.36);
 }
 
 @theme inline {
@@ -74,28 +100,68 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-app-background: var(--app-background);
+  --color-app-sidebar: var(--app-sidebar);
+  --color-app-surface: var(--app-surface);
+  --color-app-surface-raised: var(--app-surface-raised);
+  --color-app-muted-surface: var(--app-muted-surface);
+  --color-app-hover: var(--app-hover);
+  --color-app-border: var(--app-border);
+  --color-app-border-strong: var(--app-border-strong);
+  --color-app-text-muted: var(--app-text-muted);
+  --color-app-user: var(--app-user);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
 }
 
 * {
   border-color: var(--border);
 }
 
-body {
-  min-height: 100vh;
-  background: var(--background);
-  color: var(--foreground);
-}
-
 html {
   color-scheme: light;
+  background: var(--app-background);
 }
 
 html.dark {
   color-scheme: dark;
+}
+
+body {
+  min-height: 100dvh;
+  overflow-x: hidden;
+  background: var(--app-background);
+  color: var(--foreground);
+  font-synthesis-weight: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--foreground) 18%, transparent);
+}
+
+.docsai-scrollbar {
+  scrollbar-gutter: stable;
+}
+
+.docsai-scrollbar::-webkit-scrollbar {
+  width: 10px;
+}
+
+.docsai-scrollbar::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--foreground) 18%, transparent);
+  border: 3px solid transparent;
+  border-radius: var(--radius-pill);
+  background-clip: padding-box;
+}
+
+.docsai-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 @media (prefers-reduced-motion: reduce) {

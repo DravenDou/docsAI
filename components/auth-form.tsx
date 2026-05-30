@@ -42,17 +42,17 @@ export function AuthForm() {
       animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.28, ease: "easeOut" }}
     >
-      <Card className="mx-auto w-full max-w-md border-slate-200 bg-white/90 shadow-xl shadow-slate-200/70 backdrop-blur transition-colors duration-300 dark:border-slate-800 dark:bg-slate-900/85 dark:shadow-slate-950/40">
-        <CardHeader>
-          <CardTitle className="dark:text-slate-50">Iniciar sesión</CardTitle>
-          <CardDescription className="dark:text-slate-400">
+      <Card className="mx-auto w-full max-w-md gap-5 rounded-[1.5rem] border-app-border bg-app-surface-raised/95 py-6 shadow-[var(--app-glow)] backdrop-blur transition-colors duration-300">
+        <CardHeader className="px-6">
+          <CardTitle className="text-xl tracking-tight">Iniciar sesión</CardTitle>
+          <CardDescription className="text-app-text-muted">
             El registro público está cerrado. Usa la cuenta de prueba que ya creaste para revisar el demo.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6">
           <form className="space-y-4" onSubmit={onSubmit}>
             <div className="space-y-2">
-              <label className="text-sm font-medium dark:text-slate-200" htmlFor="email">
+              <label className="text-sm font-medium" htmlFor="email">
                 Email
               </label>
               <Input
@@ -62,10 +62,11 @@ export function AuthForm() {
                 required
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
+                className="h-11 rounded-[var(--radius-row)] border-app-border bg-app-surface dark:bg-app-surface"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium dark:text-slate-200" htmlFor="password">
+              <label className="text-sm font-medium" htmlFor="password">
                 Contraseña
               </label>
               <Input
@@ -76,6 +77,7 @@ export function AuthForm() {
                 required
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
+                className="h-11 rounded-[var(--radius-row)] border-app-border bg-app-surface dark:bg-app-surface"
               />
             </div>
             {error ? (
@@ -83,11 +85,11 @@ export function AuthForm() {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             ) : null}
-            <Button className="w-full" type="submit" disabled={isPending}>
+            <Button className="h-11 w-full rounded-full" type="submit" disabled={isPending}>
               {isPending ? "Entrando..." : "Entrar"}
             </Button>
           </form>
-          <p className="mt-4 text-center text-xs leading-5 text-muted-foreground">
+          <p className="mt-4 text-center text-xs leading-5 text-app-text-muted">
             Si necesitas otra cuenta, se habilita manualmente desde configuración del servidor.
           </p>
         </CardContent>

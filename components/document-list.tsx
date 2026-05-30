@@ -5,8 +5,8 @@ import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { DocumentStatus, DocumentSummary } from "@/src/types/documents";
+import { cn } from "@/src/lib/utils";
 
 const statusLabels: Record<DocumentStatus, string> = {
   queued: "En cola",
@@ -57,15 +57,19 @@ export function DocumentList({
   }
 
   return (
-    <Card className="border-[#e5e5e5] bg-white shadow-none transition-colors dark:border-[#2f2f2f] dark:bg-[#212121]">
-      <CardHeader className="space-y-1.5 p-4">
-        <CardTitle className="text-base dark:text-slate-50">Biblioteca</CardTitle>
-        <CardDescription className="text-xs">Selecciona docs listos para acotar el contexto.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-2 p-3 pt-0">
-        {isLoading ? <p className="text-sm text-muted-foreground">Cargando documentos...</p> : null}
+    <section className="rounded-[var(--radius-panel)] border border-app-border bg-app-surface-raised p-3 shadow-sm">
+      <div className="mb-3 flex items-end justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="text-sm font-semibold tracking-tight">Biblioteca</h2>
+          <p className="mt-1 text-xs leading-5 text-app-text-muted">Selecciona documentos listos para acotar el contexto.</p>
+        </div>
+        {documents.length ? <span className="shrink-0 text-xs text-app-text-muted">{documents.length}</span> : null}
+      </div>
+
+      <div className="space-y-2">
+        {isLoading ? <p className="rounded-[var(--radius-row)] bg-app-muted-surface p-3 text-sm text-app-text-muted">Cargando documentos...</p> : null}
         {!isLoading && documents.length === 0 ? (
-          <p className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground dark:border-[#2f2f2f]">
+          <p className="rounded-[var(--radius-row)] border border-dashed border-app-border p-4 text-sm leading-6 text-app-text-muted">
             Todavía no hay documentos.
           </p>
         ) : null}
@@ -75,47 +79,58 @@ export function DocumentList({
           return (
             <div
               key={document.id}
-              className="rounded-2xl border border-[#e5e5e5] p-3 transition hover:bg-[#f9f9f9] dark:border-[#2f2f2f] dark:hover:bg-[#2a2a2a]"
+              className={cn(
+                "rounded-[var(--radius-row)] border p-3 transition hover:bg-app-hover",
+                isSelected ? "border-foreground bg-app-muted-surface" : "border-app-border bg-app-surface",
+              )}
             >
               <div className="flex items-start justify-between gap-3">
-                <label className="flex min-w-0 flex-1 gap-3">
+                <label className="flex min-w-0 flex-1 cursor-pointer gap-3">
                   <input
-                    className="mt-1 h-4 w-4 rounded border-input"
+                    className="mt-1 size-4 rounded border-input accent-foreground disabled:cursor-not-allowed disabled:opacity-50"
                     type="checkbox"
                     disabled={!isReady}
                     checked={isSelected}
                     onChange={() => toggle(document.id)}
                     aria-label={`Seleccionar ${document.name}`}
                   />
-                  <span className="min-w-0">
-                    <span className="block truncate font-medium text-slate-950 dark:text-slate-50">{document.name}</span>
-                    <span className="mt-1 block text-xs text-muted-foreground">
-                      {formatBytes(document.size)} • {document.pageCount} págs • {document.chunkCount} chunks
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-sm font-medium text-foreground" title={document.name}>
+                      {document.name}
+                    </span>
+                    <span className="mt-1 flex flex-wrap gap-x-2 gap-y-1 text-xs text-app-text-muted">
+                      <span>{formatBytes(document.size)}</span>
+                      <span>{document.pageCount} págs</span>
+                      <span>{document.chunkCount} chunks</span>
                     </span>
                   </span>
                 </label>
-                <Badge variant={statusVariants[document.status]}>{statusLabels[document.status]}</Badge>
+                <Badge className="shrink-0 rounded-full" variant={statusVariants[document.status]}>
+                  {statusLabels[document.status]}
+                </Badge>
               </div>
               {document.errorMessage ? <p className="mt-2 text-xs text-destructive">{document.errorMessage}</p> : null}
-              <div className="mt-3 flex items-center justify-between gap-2 text-xs text-muted-foreground">
-                <span className="truncate">{document.embeddingProvider}/{document.embeddingModel}</span>
+              <div className="mt-3 flex min-w-0 items-center justify-between gap-2 text-xs text-app-text-muted">
+                <span className="min-w-0 truncate" title={`${document.embeddingProvider}/${document.embeddingModel}`}>
+                  {document.embeddingProvider}/{document.embeddingModel}
+                </span>
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
                   onClick={() => void removeDocument(document.id)}
                   disabled={deletingId === document.id}
-                  className="dark:hover:bg-[#333333]"
+                  className="h-8 shrink-0 rounded-full px-2 hover:bg-app-hover"
                 >
-                  <Trash2 className="h-4 w-4" aria-hidden="true" />
+                  <Trash2 className="size-4" aria-hidden="true" />
                   Borrar
                 </Button>
               </div>
             </div>
           );
         })}
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   );
 }
 
