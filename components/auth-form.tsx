@@ -42,11 +42,11 @@ export function AuthForm() {
       animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.28, ease: "easeOut" }}
     >
-      <Card className="mx-auto w-full max-w-md gap-5 rounded-[1.5rem] border-app-border bg-app-surface-raised/95 py-6 shadow-[var(--app-glow)] backdrop-blur transition-colors duration-300">
+      <Card className="mx-auto w-full max-w-[28rem] gap-5 rounded-[1.5rem] border-app-border bg-app-surface-raised/95 py-6 shadow-[var(--app-glow)] backdrop-blur transition-colors duration-300">
         <CardHeader className="px-6">
           <CardTitle className="text-xl tracking-tight">Iniciar sesión</CardTitle>
           <CardDescription className="text-app-text-muted">
-            El registro público está cerrado. Usa la cuenta de prueba que ya creaste para revisar el demo.
+            El registro público está cerrado. Usa tu cuenta de prueba para revisar el demo.
           </CardDescription>
         </CardHeader>
         <CardContent className="px-6">
