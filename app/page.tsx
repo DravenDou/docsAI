@@ -52,7 +52,7 @@ export default async function HomePage() {
         <div className="min-w-0 space-y-8 lg:space-y-9">
           <div className="space-y-6">
             <div className="flex w-fit flex-wrap items-center gap-2 rounded-full border border-app-border bg-app-surface-raised/85 px-3 py-2 text-xs font-medium text-app-text-muted shadow-sm backdrop-blur">
-              <span>Portfolio</span>
+              <span>RAG profesional</span>
               <span className="h-3 w-px bg-app-border" aria-hidden="true" />
               <span>Open source</span>
               <span className="h-3 w-px bg-app-border" aria-hidden="true" />
@@ -64,8 +64,9 @@ export default async function HomePage() {
                 Chatea con tus documentos. Recibe respuestas citadas.
               </h1>
               <p className="max-w-3xl text-pretty text-base leading-8 text-app-text-muted md:text-lg">
-                DOCSAI es un starter RAG profesional con Next.js, Vercel AI SDK, LiteParse,
-                PostgreSQL/pgvector, Graphile Worker y Better Auth. Directo, auditable y listo para portafolio.
+                DOCSAI es un RAG profesional para consultar documentos empresariales con respuestas citadas y
+                contexto recuperado. Usa Next.js, Vercel AI SDK, LiteParse, PostgreSQL/pgvector, Graphile Worker y
+                Better Auth.
               </p>
             </div>
 
