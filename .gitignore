@@ -37,3 +37,6 @@ skills-lock.json
 
 # TypeScript
 *.tsbuildinfo
+
+# local generated credentials
+.docsai-credentials.txt
