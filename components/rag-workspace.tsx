@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { FileText, LogOut, MessageSquareText, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { FileText, LockKeyhole, LogOut, MessageSquareText, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { ChatPanel } from "@/components/chat-panel";
@@ -12,9 +12,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/src/lib/auth-client";
 import { cn } from "@/src/lib/utils";
+import type { ModelAccessMode } from "@/src/rag/model-options";
 import type { DocumentSummary } from "@/src/types/documents";
 
-export function RagWorkspace({ userEmail }: { userEmail: string }) {
+export function RagWorkspace({ modelAccess, userEmail }: { modelAccess: ModelAccessMode; userEmail: string }) {
   const router = useRouter();
   const [documents, setDocuments] = useState<DocumentSummary[]>([]);
   const documentsRef = useRef<DocumentSummary[]>([]);
@@ -148,7 +149,16 @@ export function RagWorkspace({ userEmail }: { userEmail: string }) {
             Documentos
           </div>
           <div className="space-y-3">
-            <DocumentUploader onUploaded={refreshDocuments} />
+            {modelAccess === "openrouter-free" ? (
+              <div className="rounded-[var(--radius-panel)] border border-app-border bg-app-muted-surface p-3 text-xs leading-5 text-app-text-muted">
+                <div className="mb-1 flex items-center gap-2 font-medium text-foreground">
+                  <LockKeyhole className="size-3.5" aria-hidden="true" />
+                  Demo público
+                </div>
+                Esta cuenta usa solo modelos gratuitos de OpenRouter para chat y embeddings.
+              </div>
+            ) : null}
+            <DocumentUploader modelAccess={modelAccess} onUploaded={refreshDocuments} />
             <DocumentList
               documents={documents}
               isLoading={isLoading}
@@ -218,6 +228,7 @@ export function RagWorkspace({ userEmail }: { userEmail: string }) {
         <ChatPanel
           documents={readyDocuments}
           isSidebarOpen={isSidebarOpen}
+          modelAccess={modelAccess}
           selectedIds={selectedIds}
           onSelectionChange={setSelectedIds}
           onToggleSidebar={() => setIsSidebarOpen((open) => !open)}

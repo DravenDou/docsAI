@@ -4,6 +4,8 @@ import { z } from "zod";
 import { requireUser } from "@/src/lib/auth";
 import { enforceSameOrigin, jsonError, rejectLargeRequest, unauthorized } from "@/src/lib/http";
 import { checkRateLimit, rateLimitResponse } from "@/src/lib/rate-limit";
+import { getUserModelAccess } from "@/src/lib/user-access";
+import { OPENROUTER_FREE_CHAT_MODEL } from "@/src/rag/model-options";
 import { getChatModel } from "@/src/rag/providers";
 import { formatContext, retrieveRelevantChunks } from "@/src/rag/retrieval";
 
@@ -56,7 +58,10 @@ export async function POST(request: Request) {
 
   let model;
   try {
-    model = getChatModel();
+    model =
+      getUserModelAccess(user.email) === "openrouter-free"
+        ? getChatModel({ provider: "openrouter", model: OPENROUTER_FREE_CHAT_MODEL })
+        : getChatModel();
   } catch (error) {
     console.error("Chat model configuration failed", error);
     return jsonError("El modelo de chat no está configurado.", 503);

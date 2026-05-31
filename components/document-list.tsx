@@ -1,6 +1,6 @@
 "use client";
 
-import { Trash2 } from "lucide-react";
+import { CircleCheck, FileUp, MessageSquareText, Trash2, type LucideIcon } from "lucide-react";
 import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -69,9 +69,17 @@ export function DocumentList({
       <div className="space-y-2">
         {isLoading ? <p className="rounded-[var(--radius-row)] bg-app-muted-surface p-3 text-sm text-app-text-muted">Cargando documentos...</p> : null}
         {!isLoading && documents.length === 0 ? (
-          <p className="rounded-[var(--radius-row)] border border-dashed border-app-border p-4 text-sm leading-6 text-app-text-muted">
-            Todavía no hay documentos.
-          </p>
+          <div className="rounded-[var(--radius-row)] border border-dashed border-app-border bg-app-surface p-4">
+            <p className="text-sm font-medium tracking-tight">Tu biblioteca está vacía</p>
+            <p className="mt-1 text-sm leading-6 text-app-text-muted">
+              Sube un PDF y DOCSAI lo convertirá en contexto consultable con citas.
+            </p>
+            <div className="mt-4 space-y-2 text-xs leading-5 text-app-text-muted">
+              <OnboardingHint icon={FileUp} text="Sube un PDF desde el módulo superior." />
+              <OnboardingHint icon={CircleCheck} text="Espera a que aparezca como Listo." />
+              <OnboardingHint icon={MessageSquareText} text="Pregunta desde el chat y valida las fuentes [S]." />
+            </div>
+          </div>
         ) : null}
         {documents.map((document) => {
           const isReady = document.status === "ready";
@@ -131,6 +139,15 @@ export function DocumentList({
         })}
       </div>
     </section>
+  );
+}
+
+function OnboardingHint({ icon: Icon, text }: { icon: LucideIcon; text: string }) {
+  return (
+    <div className="flex items-center gap-2">
+      <Icon className="size-3.5 shrink-0 text-foreground" aria-hidden="true" />
+      <span>{text}</span>
+    </div>
   );
 }
 

@@ -1,4 +1,5 @@
 export type AiProviderName = "openai" | "openrouter";
+export type ModelAccessMode = "full" | "openrouter-free";
 
 export const OPENAI_EMBEDDING_MODEL = "text-embedding-3-small";
 export const OPENROUTER_FREE_EMBEDDING_MODEL = "nvidia/llama-nemotron-embed-vl-1b-v2:free";
@@ -29,4 +30,20 @@ export const EMBEDDING_OPTIONS = [
 
 export function getEmbeddingOption(provider: string, model: string) {
   return EMBEDDING_OPTIONS.find((option) => option.provider === provider && option.model === model);
+}
+
+export function getEmbeddingOptionsForAccess(accessMode: ModelAccessMode) {
+  if (accessMode === "openrouter-free") {
+    return EMBEDDING_OPTIONS.filter((option) => option.provider === "openrouter" && option.model.endsWith(":free"));
+  }
+
+  return [...EMBEDDING_OPTIONS];
+}
+
+export function getDefaultEmbeddingOption(accessMode: ModelAccessMode) {
+  return getEmbeddingOptionsForAccess(accessMode)[0] ?? EMBEDDING_OPTIONS[0];
+}
+
+export function getEmbeddingOptionForAccess(provider: string, model: string, accessMode: ModelAccessMode) {
+  return getEmbeddingOptionsForAccess(accessMode).find((option) => option.provider === provider && option.model === model);
 }

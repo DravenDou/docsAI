@@ -4,7 +4,18 @@ import { useMemo, useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { ArrowUp, FileSearch, PanelLeftClose, PanelLeftOpen, Square } from "lucide-react";
+import {
+  ArrowUp,
+  BookOpenCheck,
+  FileSearch,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Quote,
+  ShieldCheck,
+  Square,
+  UploadCloud,
+  type LucideIcon,
+} from "lucide-react";
 
 import {
   Conversation,
@@ -25,6 +36,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/src/lib/utils";
+import type { ModelAccessMode } from "@/src/rag/model-options";
 import type { DocumentSummary } from "@/src/types/documents";
 
 const suggestions = [
@@ -33,15 +45,35 @@ const suggestions = [
   "¿Qué dice sobre costos, fechas o responsabilidades?",
 ];
 
+const onboardingSteps: Array<{ icon: LucideIcon; title: string; description: string }> = [
+  {
+    icon: UploadCloud,
+    title: "Sube un PDF",
+    description: "El archivo queda en storage local privado y se procesa en segundo plano.",
+  },
+  {
+    icon: BookOpenCheck,
+    title: "Espera el estado Listo",
+    description: "LiteParse extrae páginas, DOCSAI crea chunks y pgvector guarda embeddings.",
+  },
+  {
+    icon: Quote,
+    title: "Pregunta con citas",
+    description: "Cada respuesta debe citar fuente, página y chunk para que puedas auditarla.",
+  },
+];
+
 export function ChatPanel({
   documents,
   isSidebarOpen,
+  modelAccess,
   selectedIds,
   onSelectionChange,
   onToggleSidebar,
 }: {
   documents: DocumentSummary[];
   isSidebarOpen: boolean;
+  modelAccess: ModelAccessMode;
   selectedIds: string[];
   onSelectionChange: (ids: string[]) => void;
   onToggleSidebar: () => void;
@@ -57,6 +89,7 @@ export function ChatPanel({
   const shouldReduceMotion = useReducedMotion();
   const isBusy = status === "submitted" || status === "streaming";
   const showThinking = status === "submitted";
+  const isDemoAccess = modelAccess === "openrouter-free";
 
   async function send(text: string) {
     const clean = text.trim();
@@ -100,6 +133,11 @@ export function ChatPanel({
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {isDemoAccess ? (
+            <span className="hidden rounded-full border border-app-border bg-app-muted-surface px-3 py-1.5 text-xs font-medium text-app-text-muted lg:inline-flex">
+              OpenRouter free
+            </span>
+          ) : null}
           {selectedIds.length ? (
             <Button
               type="button"
@@ -119,20 +157,68 @@ export function ChatPanel({
         <ConversationContent className="mx-auto min-h-full w-full max-w-[48rem] gap-8 px-0 py-8 sm:px-2">
           {messages.length === 0 ? (
             <motion.div
-              className="flex flex-1 flex-col items-center justify-center px-2 text-center"
+              className="flex flex-1 flex-col items-center justify-center px-2 py-10"
               initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
               animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
               transition={{ duration: 0.28, ease: "easeOut" }}
             >
-              <div className="mb-5 flex size-12 items-center justify-center rounded-[var(--radius-panel)] border border-app-border bg-app-surface-raised shadow-sm">
-                <FileSearch className="size-6 text-foreground" aria-hidden="true" />
+              <div className="w-full max-w-3xl rounded-[calc(var(--radius-panel)+0.35rem)] border border-app-border bg-app-surface-raised p-4 text-left shadow-sm sm:p-6">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="flex min-w-0 gap-4">
+                    <div className="flex size-12 shrink-0 items-center justify-center rounded-[var(--radius-panel)] border border-app-border bg-app-muted-surface shadow-sm">
+                      <FileSearch className="size-6 text-foreground" aria-hidden="true" />
+                    </div>
+                    <div className="min-w-0">
+                      <Shimmer as="h2" className="text-2xl font-semibold tracking-tight sm:text-3xl">
+                        {documents.length ? "Tus documentos están listos" : "Empieza con tu primer documento"}
+                      </Shimmer>
+                      <p className="mt-3 max-w-2xl text-sm leading-6 text-app-text-muted">
+                        {documents.length
+                          ? "Pregunta sobre todos tus documentos listos o selecciona fuentes concretas desde el panel lateral."
+                          : "Sube un PDF, espera el procesamiento y conversa con respuestas basadas solo en contexto recuperado."}
+                      </p>
+                    </div>
+                  </div>
+                  {isDemoAccess ? (
+                    <div className="inline-flex shrink-0 items-center gap-2 rounded-full border border-app-border bg-app-muted-surface px-3 py-1.5 text-xs font-medium text-app-text-muted">
+                      <ShieldCheck className="size-3.5 text-foreground" aria-hidden="true" />
+                      Demo free
+                    </div>
+                  ) : null}
+                </div>
+
+                <div className="mt-6 grid gap-2 sm:grid-cols-3">
+                  {onboardingSteps.map((step) => {
+                    const StepIcon = step.icon;
+                    return (
+                      <div key={step.title} className="rounded-[var(--radius-row)] border border-app-border bg-app-surface p-3">
+                        <StepIcon className="mb-3 size-4 text-foreground" aria-hidden="true" />
+                        <h3 className="text-sm font-semibold tracking-tight">{step.title}</h3>
+                        <p className="mt-1 text-xs leading-5 text-app-text-muted">{step.description}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="mt-5 flex flex-col gap-3 rounded-[var(--radius-row)] bg-app-muted-surface p-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0 text-sm leading-6 text-app-text-muted">
+                    {documents.length
+                      ? `${documents.length} documento${documents.length === 1 ? "" : "s"} listo${documents.length === 1 ? "" : "s"} para consultar.`
+                      : "El primer paso vive en el panel de documentos."}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="rounded-full border-app-border bg-app-surface-raised hover:bg-app-hover"
+                    disabled={isSidebarOpen}
+                    onClick={() => {
+                      if (!isSidebarOpen) onToggleSidebar();
+                    }}
+                  >
+                    {isSidebarOpen ? "Panel abierto" : "Abrir panel"}
+                  </Button>
+                </div>
               </div>
-              <Shimmer as="h2" className="text-2xl font-semibold tracking-tight sm:text-3xl">
-                ¿Qué quieres saber de tus docs?
-              </Shimmer>
-              <p className="mt-3 max-w-md text-sm leading-6 text-app-text-muted">
-                Sube PDFs desde la barra lateral, espera a que estén listos y pregunta. Las respuestas deben citar fuentes.
-              </p>
               <Suggestions className="mx-auto mt-7 flex w-full max-w-3xl flex-wrap justify-center gap-2 py-1">
                 {suggestions.map((suggestion) => (
                   <Suggestion

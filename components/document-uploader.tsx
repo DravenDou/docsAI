@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { FileUIPart } from "ai";
-import { UploadCloud } from "lucide-react";
+import { ShieldCheck, UploadCloud } from "lucide-react";
 
 import {
   Attachment,
@@ -14,17 +14,29 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { EMBEDDING_OPTIONS } from "@/src/rag/model-options";
+import {
+  EMBEDDING_OPTIONS,
+  getDefaultEmbeddingOption,
+  getEmbeddingOptionsForAccess,
+  type ModelAccessMode,
+} from "@/src/rag/model-options";
 import { cn } from "@/src/lib/utils";
 
 function optionKey(option: (typeof EMBEDDING_OPTIONS)[number]) {
   return `${option.provider}:${option.model}`;
 }
 
-export function DocumentUploader({ onUploaded }: { onUploaded: () => Promise<void> | void }) {
+export function DocumentUploader({
+  modelAccess,
+  onUploaded,
+}: {
+  modelAccess: ModelAccessMode;
+  onUploaded: () => Promise<void> | void;
+}) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const objectUrlRef = useRef<string | null>(null);
-  const [embeddingKey, setEmbeddingKey] = useState(optionKey(EMBEDDING_OPTIONS[0]));
+  const embeddingOptions = useMemo(() => getEmbeddingOptionsForAccess(modelAccess), [modelAccess]);
+  const [embeddingKey, setEmbeddingKey] = useState(optionKey(getDefaultEmbeddingOption(modelAccess)));
   const [selectedAttachment, setSelectedAttachment] = useState<(FileUIPart & { id: string }) | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -82,7 +94,8 @@ export function DocumentUploader({ onUploaded }: { onUploaded: () => Promise<voi
     }
 
     const formData = new FormData();
-    const selectedEmbedding = EMBEDDING_OPTIONS.find((option) => optionKey(option) === embeddingKey) ?? EMBEDDING_OPTIONS[0];
+    const selectedEmbedding =
+      embeddingOptions.find((option) => optionKey(option) === embeddingKey) ?? getDefaultEmbeddingOption(modelAccess);
     formData.set("embeddingProvider", selectedEmbedding.provider);
     formData.set("embeddingModel", selectedEmbedding.model);
     formData.set("file", file);
@@ -110,14 +123,23 @@ export function DocumentUploader({ onUploaded }: { onUploaded: () => Promise<voi
         </div>
         <div className="min-w-0">
           <h2 className="text-sm font-semibold tracking-tight">Subir PDF</h2>
-          <p className="mt-1 text-xs leading-5 text-app-text-muted">Storage local privado, sin S3 externo.</p>
+          <p className="mt-1 text-xs leading-5 text-app-text-muted">
+            Storage local privado, procesamiento con citas por página y chunk.
+          </p>
         </div>
       </div>
+
+      {modelAccess === "openrouter-free" ? (
+        <div className="mb-3 flex items-start gap-2 rounded-[var(--radius-row)] border border-app-border bg-app-muted-surface px-3 py-2 text-xs leading-5 text-app-text-muted">
+          <ShieldCheck className="mt-0.5 size-3.5 shrink-0 text-foreground" aria-hidden="true" />
+          <span>Modo demo: solo está habilitado el embedding gratuito de OpenRouter.</span>
+        </div>
+      ) : null}
 
       <form className="space-y-3" onSubmit={onSubmit}>
         <fieldset className="space-y-2">
           <legend className="sr-only">Embeddings para este documento</legend>
-          {EMBEDDING_OPTIONS.map((option) => {
+          {embeddingOptions.map((option) => {
             const key = optionKey(option);
             const isSelected = key === embeddingKey;
             return (

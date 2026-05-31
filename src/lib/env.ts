@@ -18,6 +18,7 @@ const envSchema = z.object({
   OPENROUTER_API_KEY: z.string().optional(),
   CHAT_PROVIDER: z.enum(["openai", "openrouter"]).default("openrouter"),
   CHAT_MODEL: z.string().min(1).default("openrouter/free"),
+  DEMO_USER_EMAIL: z.email().default("demo@docs.devdraven.dev"),
   ALLOW_SIGN_UP: z.enum(["true", "false"]).default("false").transform((value) => value === "true"),
 });
 

@@ -16,6 +16,11 @@ export interface EmbeddingConfig {
   dimensions: typeof VECTOR_DIMENSIONS;
 }
 
+export interface ChatModelConfig {
+  provider: AiProviderName;
+  model: string;
+}
+
 export function getEmbeddingModel(config?: Pick<EmbeddingConfig, "provider" | "model">): EmbeddingModel {
   const env = getServerEnv();
   const provider = config?.provider ?? env.EMBEDDINGS_PROVIDER;
@@ -24,9 +29,11 @@ export function getEmbeddingModel(config?: Pick<EmbeddingConfig, "provider" | "m
   return getProvider(provider).embeddingModel(model);
 }
 
-export function getChatModel(): LanguageModel {
+export function getChatModel(overrides?: Partial<ChatModelConfig>): LanguageModel {
   const env = getServerEnv();
-  return getProvider(env.CHAT_PROVIDER).chat(env.CHAT_MODEL);
+  const provider = overrides?.provider ?? env.CHAT_PROVIDER;
+  const model = overrides?.model ?? env.CHAT_MODEL;
+  return getProvider(provider).chat(model);
 }
 
 export function getEmbeddingConfig(overrides?: Partial<Pick<EmbeddingConfig, "provider" | "model">>): EmbeddingConfig {

@@ -10,7 +10,12 @@ import { createId } from "@/src/lib/ids";
 import { checkRateLimit, rateLimitResponse } from "@/src/lib/rate-limit";
 import { deletePrivateFile, savePrivateUpload } from "@/src/lib/storage";
 import { validatePdfUpload } from "@/src/lib/uploads";
-import { getEmbeddingOption, OPENAI_EMBEDDING_MODEL } from "@/src/rag/model-options";
+import { getUserModelAccess } from "@/src/lib/user-access";
+import {
+  getDefaultEmbeddingOption,
+  getEmbeddingOptionForAccess,
+  type ModelAccessMode,
+} from "@/src/rag/model-options";
 import { getEmbeddingConfig } from "@/src/rag/providers";
 
 export const runtime = "nodejs";
@@ -75,7 +80,7 @@ export async function POST(request: Request) {
   let embeddingConfig: ReturnType<typeof getEmbeddingConfig>;
   try {
     const formData = await request.formData();
-    embeddingConfig = getEmbeddingConfig(parseEmbeddingSelection(formData));
+    embeddingConfig = getEmbeddingConfig(parseEmbeddingSelection(formData, getUserModelAccess(user.email)));
     const file = formData.get("file");
     if (!(file instanceof File)) return jsonError("Missing file field.");
     upload = await validatePdfUpload(file);
@@ -127,11 +132,15 @@ export async function POST(request: Request) {
   }
 }
 
-function parseEmbeddingSelection(formData: FormData) {
-  const provider = asString(formData.get("embeddingProvider")) ?? "openai";
-  const model = asString(formData.get("embeddingModel")) ?? OPENAI_EMBEDDING_MODEL;
-  const option = getEmbeddingOption(provider, model);
+function parseEmbeddingSelection(formData: FormData, accessMode: ModelAccessMode) {
+  const fallback = getDefaultEmbeddingOption(accessMode);
+  const provider = asString(formData.get("embeddingProvider")) ?? fallback.provider;
+  const model = asString(formData.get("embeddingModel")) ?? fallback.model;
+  const option = getEmbeddingOptionForAccess(provider, model, accessMode);
   if (!option) {
+    if (accessMode === "openrouter-free") {
+      throw new Error("La cuenta demo solo puede usar modelos gratuitos de OpenRouter.");
+    }
     throw new Error("Embedding provider/model is not supported for this demo.");
   }
   return { provider: option.provider, model: option.model };
