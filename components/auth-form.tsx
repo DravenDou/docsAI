@@ -8,10 +8,12 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { useLanguage } from "@/components/language-provider";
 import { authClient } from "@/src/lib/auth-client";
 
 export function AuthForm() {
   const router = useRouter();
+  const { t } = useLanguage();
   const shouldReduceMotion = useReducedMotion();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,7 +30,7 @@ export function AuthForm() {
     setIsPending(false);
 
     if (result.error) {
-      setError(result.error.message ?? "No se pudo iniciar sesión.");
+      setError(result.error.message ?? t.auth.signInError);
       return;
     }
 
@@ -44,16 +46,14 @@ export function AuthForm() {
     >
       <Card className="mx-auto w-full max-w-[28rem] gap-5 rounded-[1.5rem] border-app-border bg-app-surface-raised/95 py-6 shadow-[var(--app-glow)] backdrop-blur transition-colors duration-300">
         <CardHeader className="px-6">
-          <CardTitle className="text-xl tracking-tight">Iniciar sesión</CardTitle>
-          <CardDescription className="text-app-text-muted">
-            El registro público está cerrado. Usa tu cuenta de prueba para revisar el demo.
-          </CardDescription>
+          <CardTitle className="text-xl tracking-tight">{t.auth.title}</CardTitle>
+          <CardDescription className="text-app-text-muted">{t.auth.description}</CardDescription>
         </CardHeader>
         <CardContent className="px-6">
           <form className="space-y-4" onSubmit={onSubmit}>
             <div className="space-y-2">
               <label className="text-sm font-medium" htmlFor="email">
-                Email
+                {t.auth.email}
               </label>
               <Input
                 id="email"
@@ -67,7 +67,7 @@ export function AuthForm() {
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium" htmlFor="password">
-                Contraseña
+                {t.auth.password}
               </label>
               <Input
                 id="password"
@@ -86,7 +86,7 @@ export function AuthForm() {
               </Alert>
             ) : null}
             <Button className="h-11 w-full rounded-full" type="submit" disabled={isPending}>
-              {isPending ? "Entrando..." : "Entrar"}
+              {isPending ? t.auth.pending : t.auth.submit}
             </Button>
           </form>
         </CardContent>

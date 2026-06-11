@@ -14,6 +14,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useLanguage } from "@/components/language-provider";
 import {
   EMBEDDING_OPTIONS,
   getDefaultEmbeddingOption,
@@ -33,6 +34,7 @@ export function DocumentUploader({
   modelAccess: ModelAccessMode;
   onUploaded: () => Promise<void> | void;
 }) {
+  const { t } = useLanguage();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const objectUrlRef = useRef<string | null>(null);
   const embeddingOptions = useMemo(() => getEmbeddingOptionsForAccess(modelAccess), [modelAccess]);
@@ -89,7 +91,7 @@ export function DocumentUploader({
 
     const file = inputRef.current?.files?.[0];
     if (!file) {
-      setError("Selecciona un PDF primero.");
+      setError(t.uploader.selectPdf);
       return;
     }
 
@@ -104,12 +106,12 @@ export function DocumentUploader({
     try {
       const response = await fetch("/api/documents", { method: "POST", body: formData });
       const body = (await response.json()) as { document?: unknown; error?: string };
-      if (!response.ok) throw new Error(body.error ?? "No se pudo subir el documento.");
-      setMessage("Documento en cola. El worker lo procesará en segundo plano.");
+      if (!response.ok) throw new Error(body.error ?? t.uploader.uploadFailed);
+      setMessage(t.uploader.queued);
       clearSelectedFile();
       await onUploaded();
     } catch (currentError) {
-      setError(currentError instanceof Error ? currentError.message : "Error desconocido al subir.");
+      setError(currentError instanceof Error ? currentError.message : t.uploader.unknownUpload);
     } finally {
       setIsUploading(false);
     }
@@ -122,26 +124,25 @@ export function DocumentUploader({
           <UploadCloud className="size-4" aria-hidden="true" />
         </div>
         <div className="min-w-0">
-          <h2 className="text-sm font-semibold tracking-tight">Subir PDF</h2>
-          <p className="mt-1 text-xs leading-5 text-app-text-muted">
-            Storage local privado, procesamiento con citas por página y chunk.
-          </p>
+          <h2 className="text-sm font-semibold tracking-tight">{t.uploader.title}</h2>
+          <p className="mt-1 text-xs leading-5 text-app-text-muted">{t.uploader.description}</p>
         </div>
       </div>
 
       {modelAccess === "openrouter-free" ? (
         <div className="mb-3 flex items-start gap-2 rounded-[var(--radius-row)] border border-app-border bg-app-muted-surface px-3 py-2 text-xs leading-5 text-app-text-muted">
           <ShieldCheck className="mt-0.5 size-3.5 shrink-0 text-foreground" aria-hidden="true" />
-          <span>Modo demo: solo está habilitado el embedding gratuito de OpenRouter.</span>
+          <span>{t.uploader.demoWarning}</span>
         </div>
       ) : null}
 
       <form className="space-y-3" onSubmit={onSubmit}>
         <fieldset className="space-y-2">
-          <legend className="sr-only">Embeddings para este documento</legend>
+          <legend className="sr-only">{t.uploader.legend}</legend>
           {embeddingOptions.map((option) => {
             const key = optionKey(option);
             const isSelected = key === embeddingKey;
+            const optionCopy = option.provider === "openrouter" ? t.uploader.embeddingOptions.openrouter : t.uploader.embeddingOptions.openai;
             return (
               <label
                 key={key}
@@ -161,12 +162,12 @@ export function DocumentUploader({
                   onChange={() => setEmbeddingKey(key)}
                 />
                 <span className="flex min-w-0 items-center justify-between gap-3">
-                  <span className="min-w-0 truncate font-medium">{option.label}</span>
+                  <span className="min-w-0 truncate font-medium">{optionCopy.label}</span>
                   <span className="shrink-0 rounded-full bg-app-surface-raised px-2 py-0.5 text-[10px] uppercase tracking-wide text-app-text-muted">
-                    {option.shortLabel}
+                    {optionCopy.shortLabel}
                   </span>
                 </span>
-                <span className="mt-1 block text-xs leading-5 text-app-text-muted">{option.description}</span>
+                <span className="mt-1 block text-xs leading-5 text-app-text-muted">{optionCopy.description}</span>
               </label>
             );
           })}
@@ -181,7 +182,7 @@ export function DocumentUploader({
             >
               <AttachmentPreview className="rounded-[var(--radius-row)] bg-app-muted-surface" />
               <AttachmentInfo showMediaType />
-              <AttachmentRemove className="rounded-full hover:bg-app-hover" label="Quitar archivo" />
+              <AttachmentRemove className="rounded-full hover:bg-app-hover" label={t.uploader.removeFile} />
             </Attachment>
           </Attachments>
         ) : null}
@@ -207,7 +208,7 @@ export function DocumentUploader({
         ) : null}
 
         <Button className="h-10 w-full rounded-full" type="submit" disabled={isUploading}>
-          {isUploading ? "Subiendo..." : "Subir y procesar"}
+          {isUploading ? t.uploader.uploading : t.uploader.submit}
         </Button>
       </form>
     </section>

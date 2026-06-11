@@ -31,6 +31,8 @@ import {
 import { Shimmer } from "@/src/components/ai-elements/shimmer";
 import { Source, Sources, SourcesContent, SourcesTrigger } from "@/src/components/ai-elements/sources";
 import { Suggestion, Suggestions } from "@/src/components/ai-elements/suggestion";
+import { LanguageToggle } from "@/components/language-toggle";
+import { useLanguage } from "@/components/language-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -39,29 +41,7 @@ import { cn } from "@/src/lib/utils";
 import type { ModelAccessMode } from "@/src/rag/model-options";
 import type { DocumentSummary } from "@/src/types/documents";
 
-const suggestions = [
-  "Resume el documento y cita las páginas clave",
-  "Extrae riesgos, decisiones y próximos pasos",
-  "¿Qué dice sobre costos, fechas o responsabilidades?",
-];
-
-const onboardingSteps: Array<{ icon: LucideIcon; title: string; description: string }> = [
-  {
-    icon: UploadCloud,
-    title: "Sube un PDF",
-    description: "El archivo queda en storage local privado y se procesa en segundo plano.",
-  },
-  {
-    icon: BookOpenCheck,
-    title: "Espera el estado Listo",
-    description: "LiteParse extrae páginas, DOCSAI crea chunks y pgvector guarda embeddings.",
-  },
-  {
-    icon: Quote,
-    title: "Pregunta con citas",
-    description: "Cada respuesta debe citar fuente, página y chunk para que puedas auditarla.",
-  },
-];
+const onboardingIcons: LucideIcon[] = [UploadCloud, BookOpenCheck, Quote];
 
 export function ChatPanel({
   documents,
@@ -78,6 +58,7 @@ export function ChatPanel({
   onSelectionChange: (ids: string[]) => void;
   onToggleSidebar: () => void;
 }) {
+  const { t } = useLanguage();
   const [input, setInput] = useState("");
   const selectedNames = useMemo(
     () => documents.filter((document) => selectedIds.includes(document.id)).map((document) => document.name),
@@ -114,7 +95,7 @@ export function ChatPanel({
             className="size-9 rounded-full hover:bg-app-hover"
             aria-controls="documents-panel"
             aria-expanded={isSidebarOpen}
-            aria-label={isSidebarOpen ? "Cerrar panel de documentos" : "Abrir panel de documentos"}
+            aria-label={isSidebarOpen ? t.workspace.closePanel : t.workspace.openPanel}
             onClick={onToggleSidebar}
           >
             {isSidebarOpen ? (
@@ -124,11 +105,11 @@ export function ChatPanel({
             )}
           </Button>
           <div className="min-w-0">
-            <h1 className="text-sm font-semibold tracking-tight">Chat con documentos</h1>
+            <h1 className="text-sm font-semibold tracking-tight">{t.chat.title}</h1>
             <p className="truncate text-xs text-app-text-muted">
               {selectedNames.length
-                ? `Contexto: ${selectedNames.join(", ")}`
-                : "Sin selección: buscará en todos tus documentos listos."}
+                ? `${t.chat.contextPrefix}: ${selectedNames.join(", ")}`
+                : t.chat.noSelection}
             </p>
           </div>
         </div>
@@ -146,9 +127,10 @@ export function ChatPanel({
               className="rounded-full border-app-border bg-app-surface-raised hover:bg-app-hover"
               onClick={() => onSelectionChange([])}
             >
-              Usar todos
+              {t.chat.useAll}
             </Button>
           ) : null}
+          <LanguageToggle className="hidden lg:inline-flex" />
           <ThemeToggle className="size-9 rounded-full border-app-border bg-app-surface-raised hover:bg-app-hover" />
         </div>
       </header>
@@ -170,26 +152,24 @@ export function ChatPanel({
                     </div>
                     <div className="min-w-0">
                       <Shimmer as="h2" className="text-2xl font-semibold tracking-tight sm:text-3xl">
-                        {documents.length ? "Tus documentos están listos" : "Empieza con tu primer documento"}
+                        {documents.length ? t.chat.readyTitle : t.chat.emptyTitle}
                       </Shimmer>
                       <p className="mt-3 max-w-2xl text-sm leading-6 text-app-text-muted">
-                        {documents.length
-                          ? "Pregunta sobre todos tus documentos listos o selecciona fuentes concretas desde el panel lateral."
-                          : "Sube un PDF, espera el procesamiento y conversa con respuestas basadas solo en contexto recuperado."}
+                        {documents.length ? t.chat.readyDescription : t.chat.emptyDescription}
                       </p>
                     </div>
                   </div>
                   {isDemoAccess ? (
                     <div className="inline-flex shrink-0 items-center gap-2 rounded-full border border-app-border bg-app-muted-surface px-3 py-1.5 text-xs font-medium text-app-text-muted">
                       <ShieldCheck className="size-3.5 text-foreground" aria-hidden="true" />
-                      Demo free
+                      {t.chat.demoFree}
                     </div>
                   ) : null}
                 </div>
 
                 <div className="mt-6 grid gap-2 sm:grid-cols-3">
-                  {onboardingSteps.map((step) => {
-                    const StepIcon = step.icon;
+                  {t.chat.onboarding.map((step, index) => {
+                    const StepIcon = onboardingIcons[index] ?? UploadCloud;
                     return (
                       <div key={step.title} className="rounded-[var(--radius-row)] border border-app-border bg-app-surface p-3">
                         <StepIcon className="mb-3 size-4 text-foreground" aria-hidden="true" />
@@ -203,8 +183,8 @@ export function ChatPanel({
                 <div className="mt-5 flex flex-col gap-3 rounded-[var(--radius-row)] bg-app-muted-surface p-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0 text-sm leading-6 text-app-text-muted">
                     {documents.length
-                      ? `${documents.length} documento${documents.length === 1 ? "" : "s"} listo${documents.length === 1 ? "" : "s"} para consultar.`
-                      : "El primer paso vive en el panel de documentos."}
+                      ? `${documents.length} ${documents.length === 1 ? t.chat.documentReadySingular : t.chat.documentReadyPlural}`
+                      : t.chat.firstStep}
                   </div>
                   <Button
                     type="button"
@@ -215,12 +195,12 @@ export function ChatPanel({
                       if (!isSidebarOpen) onToggleSidebar();
                     }}
                   >
-                    {isSidebarOpen ? "Panel abierto" : "Abrir panel"}
+                    {isSidebarOpen ? t.chat.panelOpen : t.chat.openPanel}
                   </Button>
                 </div>
               </div>
               <Suggestions className="mx-auto mt-7 flex w-full max-w-3xl flex-wrap justify-center gap-2 py-1">
-                {suggestions.map((suggestion) => (
+                {t.chat.suggestions.map((suggestion) => (
                   <Suggestion
                     key={suggestion}
                     suggestion={suggestion}
@@ -253,7 +233,7 @@ export function ChatPanel({
         <div className="mx-auto w-full max-w-[48rem] space-y-3">
           {documents.length === 0 ? (
             <Alert variant="muted" className="rounded-[var(--radius-panel)] border-app-border bg-app-surface-raised">
-              <AlertDescription>Sube al menos un PDF y espera a que esté listo antes de preguntar.</AlertDescription>
+              <AlertDescription>{t.chat.uploadRequired}</AlertDescription>
             </Alert>
           ) : null}
           {error ? (
@@ -268,7 +248,7 @@ export function ChatPanel({
             <Textarea
               value={input}
               onChange={(event) => setInput(event.target.value)}
-              placeholder="Pregunta algo sobre tus documentos..."
+              placeholder={t.chat.placeholder}
               className="max-h-48 min-h-16 resize-none border-0 bg-transparent px-3 py-3 dark:bg-transparent text-base shadow-none focus-visible:ring-0 md:text-sm"
               onKeyDown={(event) => {
                 if (event.key === "Enter" && !event.shiftKey) {
@@ -278,14 +258,14 @@ export function ChatPanel({
               }}
             />
             <div className="flex items-center justify-between gap-3 px-2 pb-1 text-xs text-app-text-muted">
-              <span className="truncate">Enter para enviar. Shift+Enter nueva línea</span>
+              <span className="truncate">{t.chat.keyboardHint}</span>
               {isBusy ? (
                 <Button
                   type="button"
                   variant="outline"
                   size="icon"
                   className="size-9 rounded-full border-app-border bg-app-surface hover:bg-app-hover"
-                  aria-label="Detener"
+                  aria-label={t.chat.stop}
                   onClick={() => void stop()}
                 >
                   <Square className="size-4" aria-hidden="true" />
@@ -294,7 +274,7 @@ export function ChatPanel({
                 <Button
                   type="submit"
                   size="icon"
-                  aria-label="Enviar"
+                  aria-label={t.chat.send}
                   disabled={!input.trim() || documents.length === 0}
                   className="size-9 rounded-full"
                 >
@@ -304,7 +284,7 @@ export function ChatPanel({
             </div>
           </form>
           <p className="text-center text-[11px] leading-4 text-app-text-muted/80">
-            DOCSAI puede equivocarse; verifica documento, página y chunk en las citas.
+            {t.chat.disclaimer}
           </p>
         </div>
       </div>
@@ -321,6 +301,7 @@ function ChatMessage({
   isStreaming?: boolean;
   shouldReduceMotion: boolean | null;
 }) {
+  const { t } = useLanguage();
   const text = message.parts
     .filter((part) => part.type === "text")
     .map((part) => part.text)
@@ -362,26 +343,28 @@ function ChatMessage({
                   count={sourceRefs.length}
                   className="rounded-full border border-app-border bg-app-surface-raised px-3 py-1.5 text-[11px] font-medium transition hover:bg-app-hover"
                 >
-                  <span>{sourceRefs.length} citas detectadas</span>
+                  <span>
+                    {sourceRefs.length} {t.chat.citationsDetected}
+                  </span>
                 </SourcesTrigger>
                 <SourcesContent className="w-full max-w-sm rounded-[var(--radius-panel)] border border-app-border bg-app-surface-raised p-2 shadow-sm">
                   {sourceRefs.map((ref) => (
                     <Source
                       key={ref}
                       href={`#${ref.slice(1, -1).toLowerCase()}`}
-                      title={`${ref} citado en la respuesta`}
+                      title={`${ref} ${t.chat.citedInAnswer}`}
                       className="min-w-0 rounded-[var(--radius-row)] px-2 py-1.5 transition hover:bg-app-hover"
                       onClick={(event) => event.preventDefault()}
                     >
                       <span className="shrink-0 font-medium text-foreground">{ref}</span>
-                      <span className="truncate text-app-text-muted">citado en la respuesta</span>
+                      <span className="truncate text-app-text-muted">{t.chat.citedInAnswer}</span>
                     </Source>
                   ))}
                 </SourcesContent>
               </Sources>
             ) : null}
             <MessageToolbar className="mt-2 justify-start text-[11px] text-app-text-muted/80">
-              <span>Respuesta basada en contexto recuperado. Verifica citas [S].</span>
+              <span>{t.chat.toolbar}</span>
             </MessageToolbar>
           </>
         ) : null}
@@ -395,6 +378,7 @@ function extractSourceRefs(text: string) {
 }
 
 function ThinkingProcess({ shouldReduceMotion }: { shouldReduceMotion: boolean | null }) {
+  const { t } = useLanguage();
   return (
     <motion.article
       className="flex w-full justify-start"
@@ -405,7 +389,7 @@ function ThinkingProcess({ shouldReduceMotion }: { shouldReduceMotion: boolean |
       layout="position"
     >
       <div className="inline-flex items-center gap-2 rounded-full bg-app-muted-surface px-4 py-2 text-sm text-app-text-muted">
-        <span>Pensando</span>
+        <span>{t.chat.thinking}</span>
         <span className="flex items-center gap-1" aria-hidden="true">
           <span className="size-1.5 animate-bounce rounded-full bg-current [animation-delay:-0.24s]" />
           <span className="size-1.5 animate-bounce rounded-full bg-current [animation-delay:-0.12s]" />

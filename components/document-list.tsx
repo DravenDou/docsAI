@@ -5,15 +5,9 @@ import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/components/language-provider";
 import type { DocumentStatus, DocumentSummary } from "@/src/types/documents";
 import { cn } from "@/src/lib/utils";
-
-const statusLabels: Record<DocumentStatus, string> = {
-  queued: "En cola",
-  processing: "Procesando",
-  ready: "Listo",
-  failed: "Falló",
-};
 
 const statusVariants: Record<DocumentStatus, "secondary" | "warning" | "success" | "destructive"> = {
   queued: "secondary",
@@ -35,6 +29,7 @@ export function DocumentList({
   onSelectionChange: (ids: string[]) => void;
   onDeleted: () => Promise<void> | void;
 }) {
+  const { t } = useLanguage();
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   function toggle(id: string) {
@@ -47,7 +42,7 @@ export function DocumentList({
       const response = await fetch(`/api/documents/${id}`, { method: "DELETE" });
       if (!response.ok) {
         const body = (await response.json()) as { error?: string };
-        throw new Error(body.error ?? "No se pudo borrar el documento.");
+        throw new Error(body.error ?? t.documents.deleteFailed);
       }
       onSelectionChange(selectedIds.filter((item) => item !== id));
       await onDeleted();
@@ -60,24 +55,22 @@ export function DocumentList({
     <section className="rounded-[var(--radius-panel)] border border-app-border bg-app-surface-raised p-3 shadow-sm">
       <div className="mb-3 flex items-end justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="text-sm font-semibold tracking-tight">Biblioteca</h2>
-          <p className="mt-1 text-xs leading-5 text-app-text-muted">Selecciona documentos listos para acotar el contexto.</p>
+          <h2 className="text-sm font-semibold tracking-tight">{t.documents.library}</h2>
+          <p className="mt-1 text-xs leading-5 text-app-text-muted">{t.documents.subtitle}</p>
         </div>
         {documents.length ? <span className="shrink-0 text-xs text-app-text-muted">{documents.length}</span> : null}
       </div>
 
       <div className="space-y-2">
-        {isLoading ? <p className="rounded-[var(--radius-row)] bg-app-muted-surface p-3 text-sm text-app-text-muted">Cargando documentos...</p> : null}
+        {isLoading ? <p className="rounded-[var(--radius-row)] bg-app-muted-surface p-3 text-sm text-app-text-muted">{t.documents.loading}</p> : null}
         {!isLoading && documents.length === 0 ? (
           <div className="rounded-[var(--radius-row)] border border-dashed border-app-border bg-app-surface p-4">
-            <p className="text-sm font-medium tracking-tight">Tu biblioteca está vacía</p>
-            <p className="mt-1 text-sm leading-6 text-app-text-muted">
-              Sube un PDF y DOCSAI lo convertirá en contexto consultable con citas.
-            </p>
+            <p className="text-sm font-medium tracking-tight">{t.documents.emptyTitle}</p>
+            <p className="mt-1 text-sm leading-6 text-app-text-muted">{t.documents.emptyDescription}</p>
             <div className="mt-4 space-y-2 text-xs leading-5 text-app-text-muted">
-              <OnboardingHint icon={FileUp} text="Sube un PDF desde el módulo superior." />
-              <OnboardingHint icon={CircleCheck} text="Espera a que aparezca como Listo." />
-              <OnboardingHint icon={MessageSquareText} text="Pregunta desde el chat y valida las fuentes [S]." />
+              <OnboardingHint icon={FileUp} text={t.documents.hints[0]} />
+              <OnboardingHint icon={CircleCheck} text={t.documents.hints[1]} />
+              <OnboardingHint icon={MessageSquareText} text={t.documents.hints[2]} />
             </div>
           </div>
         ) : null}
@@ -100,7 +93,7 @@ export function DocumentList({
                     disabled={!isReady}
                     checked={isSelected}
                     onChange={() => toggle(document.id)}
-                    aria-label={`Seleccionar ${document.name}`}
+                    aria-label={`${t.documents.selectDocument} ${document.name}`}
                   />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-medium text-foreground" title={document.name}>
@@ -108,13 +101,13 @@ export function DocumentList({
                     </span>
                     <span className="mt-1 flex flex-wrap gap-x-2 gap-y-1 text-xs text-app-text-muted">
                       <span>{formatBytes(document.size)}</span>
-                      <span>{document.pageCount} págs</span>
-                      <span>{document.chunkCount} chunks</span>
+                      <span>{document.pageCount} {t.documents.pages}</span>
+                      <span>{document.chunkCount} {t.documents.chunks}</span>
                     </span>
                   </span>
                 </label>
                 <Badge className="shrink-0 rounded-full" variant={statusVariants[document.status]}>
-                  {statusLabels[document.status]}
+                  {t.documents.status[document.status]}
                 </Badge>
               </div>
               {document.errorMessage ? <p className="mt-2 text-xs text-destructive">{document.errorMessage}</p> : null}
@@ -131,7 +124,7 @@ export function DocumentList({
                   className="h-8 shrink-0 rounded-full px-2 hover:bg-app-hover"
                 >
                   <Trash2 className="size-4" aria-hidden="true" />
-                  Borrar
+                  {t.documents.delete}
                 </Button>
               </div>
             </div>

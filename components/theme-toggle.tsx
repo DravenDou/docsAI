@@ -4,10 +4,12 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Moon, Sun } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/components/language-provider";
 import { useTheme } from "@/components/theme-provider";
 
 export function ThemeToggle({ className }: { className?: string }) {
   const { resolvedTheme, toggleTheme } = useTheme();
+  const { t } = useLanguage();
   const shouldReduceMotion = useReducedMotion();
   const isDark = resolvedTheme === "dark";
   const Icon = isDark ? Sun : Moon;
@@ -18,7 +20,7 @@ export function ThemeToggle({ className }: { className?: string }) {
       variant="outline"
       size="icon"
       className={className}
-      aria-label={isDark ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
+      aria-label={isDark ? t.common.themeToLight : t.common.themeToDark}
       onClick={toggleTheme}
     >
       <AnimatePresence mode="wait" initial={false}>

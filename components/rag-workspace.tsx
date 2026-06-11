@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import { ChatPanel } from "@/components/chat-panel";
 import { DocumentList } from "@/components/document-list";
 import { DocumentUploader } from "@/components/document-uploader";
+import { LanguageToggle } from "@/components/language-toggle";
+import { useLanguage } from "@/components/language-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -17,6 +19,7 @@ import type { DocumentSummary } from "@/src/types/documents";
 
 export function RagWorkspace({ modelAccess, userEmail }: { modelAccess: ModelAccessMode; userEmail: string }) {
   const router = useRouter();
+  const { t } = useLanguage();
   const [documents, setDocuments] = useState<DocumentSummary[]>([]);
   const documentsRef = useRef<DocumentSummary[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -28,7 +31,7 @@ export function RagWorkspace({ modelAccess, userEmail }: { modelAccess: ModelAcc
   const loadDocuments = useCallback(async () => {
     const response = await fetch("/api/documents", { cache: "no-store" });
     const body = (await response.json()) as { documents?: DocumentSummary[]; error?: string };
-    if (!response.ok) throw new Error(body.error ?? "No se pudieron cargar los documentos.");
+    if (!response.ok) throw new Error(body.error ?? t.workspace.loadDocumentsError);
     const nextDocuments = body.documents ?? [];
     documentsRef.current = nextDocuments;
     setDocuments(nextDocuments);
@@ -36,7 +39,7 @@ export function RagWorkspace({ modelAccess, userEmail }: { modelAccess: ModelAcc
       nextDocuments.filter((document) => document.status === "ready").map((document) => document.id),
     );
     setSelectedIds((current) => current.filter((id) => nextReadyIds.has(id)));
-  }, []);
+  }, [t.workspace.loadDocumentsError]);
 
   useEffect(() => {
     let ignore = false;
@@ -46,7 +49,7 @@ export function RagWorkspace({ modelAccess, userEmail }: { modelAccess: ModelAcc
         if (!ignore) setError(null);
         await loadDocuments();
       } catch (currentError) {
-        if (!ignore) setError(currentError instanceof Error ? currentError.message : "Error desconocido.");
+        if (!ignore) setError(currentError instanceof Error ? currentError.message : t.workspace.unknownError);
       } finally {
         if (!ignore) setIsLoading(false);
       }
@@ -63,7 +66,7 @@ export function RagWorkspace({ modelAccess, userEmail }: { modelAccess: ModelAcc
       ignore = true;
       window.clearInterval(interval);
     };
-  }, [loadDocuments]);
+  }, [loadDocuments, t.workspace.unknownError]);
 
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
@@ -91,7 +94,7 @@ export function RagWorkspace({ modelAccess, userEmail }: { modelAccess: ModelAcc
     try {
       await loadDocuments();
     } catch (currentError) {
-      setError(currentError instanceof Error ? currentError.message : "Error desconocido.");
+      setError(currentError instanceof Error ? currentError.message : t.workspace.unknownError);
     }
   }
 
@@ -107,7 +110,7 @@ export function RagWorkspace({ modelAccess, userEmail }: { modelAccess: ModelAcc
         <button
           type="button"
           className="fixed inset-0 z-30 bg-black/20 backdrop-blur-[1px] md:hidden dark:bg-black/55"
-          aria-label="Cerrar panel de documentos"
+          aria-label={t.workspace.closePanel}
           onClick={() => setIsSidebarOpen(false)}
         />
       ) : null}
@@ -127,7 +130,7 @@ export function RagWorkspace({ modelAccess, userEmail }: { modelAccess: ModelAcc
           </div>
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold tracking-tight">DOCSAI</p>
-            <p className="text-xs text-app-text-muted">Docs empresariales</p>
+            <p className="text-xs text-app-text-muted">{t.workspace.docsSubtitle}</p>
           </div>
           <Button
             type="button"
@@ -136,7 +139,7 @@ export function RagWorkspace({ modelAccess, userEmail }: { modelAccess: ModelAcc
             className="ml-auto size-9 rounded-full hover:bg-app-hover"
             aria-controls="documents-panel"
             aria-expanded={isSidebarOpen}
-            aria-label="Cerrar panel de documentos"
+            aria-label={t.workspace.closePanel}
             onClick={() => setIsSidebarOpen(false)}
           >
             <PanelLeftClose className="size-4" aria-hidden="true" />
@@ -146,16 +149,16 @@ export function RagWorkspace({ modelAccess, userEmail }: { modelAccess: ModelAcc
         <div className="docsai-scrollbar min-h-0 flex-1 overflow-y-auto p-3">
           <div className="mb-3 flex items-center gap-2 px-1 text-xs font-medium uppercase tracking-[0.18em] text-app-text-muted">
             <FileText className="size-3.5" aria-hidden="true" />
-            Documentos
+            {t.workspace.documents}
           </div>
           <div className="space-y-3">
             {modelAccess === "openrouter-free" ? (
               <div className="rounded-[var(--radius-panel)] border border-app-border bg-app-muted-surface p-3 text-xs leading-5 text-app-text-muted">
                 <div className="mb-1 flex items-center gap-2 font-medium text-foreground">
                   <LockKeyhole className="size-3.5" aria-hidden="true" />
-                  Demo público
+                  {t.workspace.demoTitle}
                 </div>
-                Esta cuenta usa solo modelos gratuitos de OpenRouter para chat y embeddings.
+                {t.workspace.demoDescription}
               </div>
             ) : null}
             <DocumentUploader modelAccess={modelAccess} onUploaded={refreshDocuments} />
@@ -173,7 +176,7 @@ export function RagWorkspace({ modelAccess, userEmail }: { modelAccess: ModelAcc
           <div className="mb-3 truncate rounded-[var(--radius-row)] border border-app-border bg-app-surface-raised px-3 py-2 text-xs text-app-text-muted">
             {userEmail}
           </div>
-          <div className="grid grid-cols-[1fr_auto] gap-2">
+          <div className="grid grid-cols-[1fr_auto_auto] gap-2">
             <Button
               type="button"
               variant="outline"
@@ -182,8 +185,9 @@ export function RagWorkspace({ modelAccess, userEmail }: { modelAccess: ModelAcc
               onClick={signOut}
             >
               <LogOut className="size-4" aria-hidden="true" />
-              Salir
+              {t.workspace.signOut}
             </Button>
+            <LanguageToggle />
             <ThemeToggle className="size-9 rounded-full border-app-border bg-app-surface-raised hover:bg-app-hover" />
           </div>
         </div>
@@ -199,7 +203,7 @@ export function RagWorkspace({ modelAccess, userEmail }: { modelAccess: ModelAcc
               className="size-9 rounded-full hover:bg-app-hover"
               aria-controls="documents-panel"
               aria-expanded={isSidebarOpen}
-              aria-label={isSidebarOpen ? "Cerrar panel de documentos" : "Abrir panel de documentos"}
+              aria-label={isSidebarOpen ? t.workspace.closePanel : t.workspace.openPanel}
               onClick={() => setIsSidebarOpen((open) => !open)}
             >
               {isSidebarOpen ? (
@@ -215,8 +219,9 @@ export function RagWorkspace({ modelAccess, userEmail }: { modelAccess: ModelAcc
           </div>
           <div className="flex items-center gap-2">
             <ThemeToggle className="size-9 rounded-full border-app-border bg-app-surface-raised hover:bg-app-hover" />
+            <LanguageToggle className="hidden sm:inline-flex" />
             <Button type="button" variant="outline" size="sm" className="rounded-full border-app-border" onClick={signOut}>
-              Salir
+              {t.workspace.signOut}
             </Button>
           </div>
         </div>
