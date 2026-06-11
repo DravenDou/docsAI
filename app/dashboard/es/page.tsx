@@ -5,12 +5,12 @@ import { RagWorkspace } from "@/components/rag-workspace";
 import { getSession } from "@/src/lib/auth";
 import { getUserModelAccess } from "@/src/lib/user-access";
 
-export default async function DashboardPage() {
+export default async function SpanishDashboardPage() {
   const session = await getSession();
-  if (!session?.user) redirect("/");
+  if (!session?.user) redirect("/es");
 
   return (
-    <LanguageProvider language="en">
+    <LanguageProvider language="es">
       <RagWorkspace modelAccess={getUserModelAccess(session.user.email)} userEmail={session.user.email} />
     </LanguageProvider>
   );

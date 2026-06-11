@@ -19,7 +19,7 @@ import type { DocumentSummary } from "@/src/types/documents";
 
 export function RagWorkspace({ modelAccess, userEmail }: { modelAccess: ModelAccessMode; userEmail: string }) {
   const router = useRouter();
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const [documents, setDocuments] = useState<DocumentSummary[]>([]);
   const documentsRef = useRef<DocumentSummary[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -100,7 +100,7 @@ export function RagWorkspace({ modelAccess, userEmail }: { modelAccess: ModelAcc
 
   async function signOut() {
     await authClient.signOut();
-    router.replace("/");
+    router.replace(language === "es" ? "/es" : "/");
     router.refresh();
   }
 

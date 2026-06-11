@@ -58,7 +58,7 @@ export function ChatPanel({
   onSelectionChange: (ids: string[]) => void;
   onToggleSidebar: () => void;
 }) {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const [input, setInput] = useState("");
   const selectedNames = useMemo(
     () => documents.filter((document) => selectedIds.includes(document.id)).map((document) => document.name),
@@ -76,7 +76,7 @@ export function ChatPanel({
     const clean = text.trim();
     if (!clean || isBusy) return;
     setInput("");
-    await sendMessage({ text: clean }, { body: { documentIds: selectedIds } });
+    await sendMessage({ text: clean }, { body: { documentIds: selectedIds, language } });
   }
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {

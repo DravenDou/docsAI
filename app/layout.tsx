@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 
-import { LanguageProvider } from "@/components/language-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -13,13 +12,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="es" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body>
-        <LanguageProvider>
-          <ThemeProvider>
-            <TooltipProvider>{children}</TooltipProvider>
-          </ThemeProvider>
-        </LanguageProvider>
+        <ThemeProvider>
+          <TooltipProvider>{children}</TooltipProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

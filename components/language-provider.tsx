@@ -1,45 +1,24 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo } from "react";
 
-import { isLanguage, normalizeLanguage, translations, type Dictionary, type Language } from "@/src/lib/i18n";
-
-const LANGUAGE_STORAGE_KEY = "docsai-language";
+import { translations, type Dictionary, type Language } from "@/src/lib/i18n";
 
 type LanguageContextValue = {
   language: Language;
-  setLanguage: (language: Language) => void;
   t: Dictionary;
 };
 
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguageState] = useState<Language>("es");
-  const [isLoaded, setIsLoaded] = useState(false);
-
+export function LanguageProvider({ children, language }: { children: React.ReactNode; language: Language }) {
   useEffect(() => {
-    const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
-    const nextLanguage = isLanguage(stored) ? stored : normalizeLanguage(window.navigator.language);
-    document.documentElement.lang = nextLanguage;
-    const frame = window.requestAnimationFrame(() => {
-      setLanguageState(nextLanguage);
-      setIsLoaded(true);
-    });
-
-    return () => window.cancelAnimationFrame(frame);
-  }, []);
-
-  useEffect(() => {
-    if (!isLoaded) return;
-    window.localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
     document.documentElement.lang = language;
-  }, [isLoaded, language]);
+  }, [language]);
 
   const value = useMemo<LanguageContextValue>(
     () => ({
       language,
-      setLanguage: setLanguageState,
       t: translations[language],
     }),
     [language],

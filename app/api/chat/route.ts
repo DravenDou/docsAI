@@ -16,6 +16,7 @@ const CHAT_RATE_LIMIT = { limit: 30, windowMs: 60 * 1000 };
 const chatBodySchema = z.object({
   messages: z.array(z.custom<UIMessage>()).min(1).max(30),
   documentIds: z.array(z.string().min(1)).max(20).optional(),
+  language: z.enum(["en", "es"]).default("en"),
 });
 
 export async function POST(request: Request) {
@@ -53,7 +54,12 @@ export async function POST(request: Request) {
     return jsonError("No se pudo recuperar contexto para esta pregunta.", 500);
   }
 
-  const context = retrieved.length ? formatContext(retrieved) : "No hay chunks listos para esta pregunta.";
+  const language = parsed.data.language;
+  const context = retrieved.length
+    ? formatContext(retrieved)
+    : language === "es"
+      ? "No hay chunks listos para esta pregunta."
+      : "There are no ready chunks for this question.";
   const modelMessages = await convertToModelMessages(parsed.data.messages);
 
   let model;
@@ -70,12 +76,14 @@ export async function POST(request: Request) {
   const result = streamText({
     model,
     system: [
-      "Eres un asistente RAG para documentos empresariales.",
-      "Responde en el idioma del usuario y de forma concisa.",
-      "Usa solo el contexto recuperado. Si el contexto no contiene la respuesta, dilo claramente.",
-      "Cita cada afirmación importante con el identificador de fuente, por ejemplo [S1].",
-      "Cada fuente incluye documento, página y chunk; no inventes páginas ni documentos.",
-      "Contexto recuperado:",
+      "You are a RAG assistant for enterprise documents.",
+      language === "es"
+        ? "Responde siempre en español. No cambies de idioma aunque el usuario escriba en otro idioma."
+        : "Always answer in English. Do not switch languages even if the user writes in another language.",
+      "Use only the retrieved context. If the context does not contain the answer, say so clearly.",
+      "Cite every important claim with a source identifier, for example [S1].",
+      "Each source includes document, page, and chunk; never invent pages or documents.",
+      "Retrieved context:",
       context,
     ].join("\n\n"),
     messages: modelMessages,
@@ -87,7 +95,7 @@ export async function POST(request: Request) {
     originalMessages: parsed.data.messages,
     onError(error) {
       console.error(error);
-      return "No se pudo generar la respuesta.";
+      return language === "es" ? "No se pudo generar la respuesta." : "Could not generate the answer.";
     },
   });
 }

@@ -1,4 +1,4 @@
-export const languages = ["es", "en"] as const;
+export const languages = ["en", "es"] as const;
 export type Language = (typeof languages)[number];
 
 export const languageLabels: Record<Language, string> = {
@@ -11,11 +11,11 @@ export function isLanguage(value: string | null | undefined): value is Language 
 }
 
 export function normalizeLanguage(value: string | null | undefined): Language {
-  if (!value) return "es";
+  if (!value) return "en";
   const normalized = value.toLowerCase();
   if (normalized.startsWith("en")) return "en";
   if (normalized.startsWith("es")) return "es";
-  return "es";
+  return "en";
 }
 
 export const translations = {

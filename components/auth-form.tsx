@@ -13,7 +13,7 @@ import { authClient } from "@/src/lib/auth-client";
 
 export function AuthForm() {
   const router = useRouter();
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const shouldReduceMotion = useReducedMotion();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -34,7 +34,7 @@ export function AuthForm() {
       return;
     }
 
-    router.replace("/dashboard");
+    router.replace(language === "es" ? "/dashboard/es" : "/dashboard");
     router.refresh();
   }
 
